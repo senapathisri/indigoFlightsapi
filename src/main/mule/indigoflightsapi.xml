@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
     <apikit:config name="indigoflightsapi-config" api="indigoflightsapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-	<http:listener-config name="indigoFlights_HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="578adb1d-3815-4d2b-8963-98900a32c142" >
-		<http:listener-connection host="0.0.0.0" port="8081" />
-	</http:listener-config>
-	<flow name="indigoflightsapi-main">
-        <http:listener path="indigoFlights/api/*" config-ref="indigoFlights_HTTP_Listener_config">
+    <http:listener-config name="indigoFlights_HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="578adb1d-3815-4d2b-8963-98900a32c142">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <flow name="indigoflightsapi-main">
+        <http:listener path="/indigoFlights/api/*" config-ref="indigoFlights_HTTP_Listener_config">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
@@ -97,7 +97,18 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\indigoFlights:indigoflightsapi-config">
-		<flow-ref doc:name="indigoFlightsFlow" doc:id="105d1a57-23c4-4779-a627-1b64d416e1be" name="indigoFlightsFlow"/>
-		<logger level="INFO" doc:name="Logger" doc:id="274e2d21-b555-451f-8c53-a4649a6c34c7" message="final response sent-----------------"/>
+        <flow-ref doc:name="indigoFlightsFlow" doc:id="105d1a57-23c4-4779-a627-1b64d416e1be" name="indigoFlightsFlow" />
+        <logger level="INFO" doc:name="Logger" doc:id="274e2d21-b555-451f-8c53-a4649a6c34c7" message="final response sent-----------------" />
+    </flow>
+    <flow name="get:\indigoFlights\(source)\(destination)\(doj):indigoflightsapi-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="source">attributes.uriParams.'source'</ee:set-variable>
+                <ee:set-variable variableName="destination">attributes.uriParams.'destination'</ee:set-variable>
+                <ee:set-variable variableName="doj">attributes.uriParams.'doj'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<flow-ref doc:name="indigoFlightsbyUriParamsFlow" doc:id="6ed6b292-0fc8-49cf-9758-37cc0d775921" name="indigoFlightsbyUriParamsFlow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="4e17ea97-31cd-43f2-81b8-33bcfd636851" message="final response sent--------------"/>
     </flow>
 </mule>
